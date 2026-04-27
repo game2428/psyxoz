@@ -3,376 +3,392 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Школьный турнир по физике</title>
+    <title>Турнир по физике</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #f9fafb; --text: #111827; --accent: #FF6600; --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-300: #d1d5db; --gray-500: #6b7280; --green: #10b981; --red: #ef4444; }
+        :root {
+            --accent: #FF6600;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --green: #10b981;
+            --red: #ef4444;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'JetBrains Mono', monospace; background: var(--bg); color: var(--text); padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--gray-100); padding-bottom: 20px; margin-bottom: 30px; }
-        h1 { font-size: 1.5rem; color: var(--accent); cursor: pointer; }
-        .subtitle { font-size: 0.85rem; color: var(--gray-500); }
-        .admin-link { color: var(--gray-300); text-decoration: none; cursor: pointer; font-size: 0.85rem; }
-        .page { display: none; } .page.active { display: block; }
-        input, select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--gray-300); border-radius: 6px; font-family: inherit; font-size: 1rem; }
-        button { padding: 10px 20px; border: none; border-radius: 6px; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 1rem; }
-        .btn-primary { background: var(--accent); color: #fff; }
-        .btn-secondary { background: var(--gray-200); color: var(--text); }
-        .btn-success { background: var(--green); color: #fff; }
-        .flex-row { display: flex; gap: 10px; margin-bottom: 10px; } .flex-row button { flex: 1; }
-        .error { color: var(--red); text-align: center; display: block; margin-bottom: 10px; }
-        .success { color: var(--green); text-align: center; display: block; margin-bottom: 10px; }
-        .tabs { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; flex-wrap: wrap; }
-        .tab { padding: 5px 10px; background: var(--gray-200); border-radius: 4px; cursor: pointer; white-space: nowrap; }
-        .tab.active { background: var(--accent); color: #fff; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--gray-200); }
-        th { background: var(--gray-100); color: var(--gray-500); }
-        .progress-container { background: var(--gray-200); height: 8px; border-radius: 4px; margin-bottom: 20px; }
-        .progress-bar { background: var(--accent); height: 100%; width: 0%; transition: width 0.3s; }
-        .timer { color: var(--accent); font-size: 1.2rem; font-weight: bold; }
-        .timer.danger { color: var(--red); animation: pulse 1s infinite; }
-        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
-        .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; margin-bottom: 20px; }
-        .result-card { background: var(--gray-100); padding: 15px; border-radius: 8px; }
-        .result-card.total { background: var(--accent); color: #fff; }
-        .detail-item { padding: 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid var(--gray-300); }
-        .admin-tabs { display: flex; gap: 15px; margin-bottom: 20px; border-bottom: 2px solid var(--gray-200); }
-        .admin-tab { padding-bottom: 10px; cursor: pointer; color: var(--gray-500); }
-        .admin-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); font-weight: bold; }
-        .admin-section { display: none; } .admin-section.active { display: block; }
-        .action-link { color: var(--accent); cursor: pointer; text-decoration: underline; margin-right: 10px; }
-        .blessing { font-size: 0.75rem; color: var(--gray-500); text-align: center; margin-top: 16px; font-style: italic; line-height: 1.6; padding: 0 10px; }
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: #f9fafb;
+            color: #111827;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .wrap {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+        }
+        h1 { font-size: 1.4rem; color: var(--accent); margin-bottom: 4px; }
+        .sub { font-size: 0.8rem; color: var(--gray-500); margin-bottom: 28px; }
+
+        /* ЭКРАНЫ */
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* ГЛАВНАЯ */
+        select, input[type="text"] {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            margin-bottom: 14px;
+            outline: none;
+            transition: border-color .2s;
+        }
+        select:focus, input:focus { border-color: var(--accent); }
+        .btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity .15s;
+        }
+        .btn:hover { opacity: .88; }
+        .btn:disabled { opacity: .5; cursor: default; }
+        .btn-orange { background: var(--accent); color: #fff; }
+        .btn-gray   { background: var(--gray-200); color: #111; }
+        .btn-green  { background: var(--green); color: #fff; }
+        .err { color: var(--red); font-size: 0.85rem; margin-bottom: 10px; text-align: center; }
+        .blessing {
+            font-size: 0.72rem;
+            color: var(--gray-500);
+            font-style: italic;
+            text-align: center;
+            margin-top: 22px;
+            line-height: 1.6;
+        }
+
+        /* ТЕСТ */
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .q-num { color: var(--gray-500); font-size: 0.9rem; }
+        .timer { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+        .timer.red { color: var(--red); animation: blink 1s step-start infinite; }
+        @keyframes blink { 50% { opacity: .4; } }
+        .progress-bg { background: var(--gray-200); height: 6px; border-radius: 3px; margin-bottom: 22px; }
+        .progress-fill { background: var(--accent); height: 100%; border-radius: 3px; transition: width .3s; }
+        .q-text { font-size: 1.05rem; line-height: 1.7; margin-bottom: 22px; }
+        .nav-row { display: flex; gap: 10px; margin-top: 8px; }
+        .nav-row .btn { flex: 1; }
+        .answered-hint { font-size: 0.78rem; color: var(--gray-500); margin-top: 8px; text-align: right; }
+
+        /* РЕЗУЛЬТАТЫ */
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .score-card {
+            background: var(--gray-100);
+            border-radius: 8px;
+            padding: 14px 10px;
+            text-align: center;
+        }
+        .score-card.total { background: var(--accent); color: #fff; }
+        .score-label { font-size: 0.75rem; opacity: .75; margin-bottom: 6px; }
+        .score-val { font-size: 1.6rem; font-weight: 700; }
+        .detail {
+            padding: 11px 14px;
+            border-radius: 8px;
+            margin-bottom: 9px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .detail.ok  { background: #d1fae5; border-left: 4px solid var(--green); }
+        .detail.bad { background: #fee2e2; border-left: 4px solid var(--red); }
+        .detail.skip{ background: var(--gray-100); border-left: 4px solid var(--gray-300); }
+        .details-scroll { max-height: 380px; overflow-y: auto; margin-bottom: 18px; }
+        code { background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; }
+
+        /* Загрузка */
+        .spinner {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--gray-500);
+        }
+        .spinner::after {
+            content: '';
+            display: inline-block;
+            width: 28px; height: 28px;
+            border: 3px solid var(--gray-200);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            margin-top: 14px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <div>
-            <h1 onclick="showPage('home')">Школьный турнир по физике</h1>
-            <div class="subtitle">Декада синдиката точных наук // 2025</div>
-        </div>
-        <a class="admin-link" onclick="showPage('admin')">[admin]</a>
-    </header>
+<div class="wrap">
+    <h1>Школьный турнир по физике</h1>
+    <div class="sub">Декада синдиката точных наук // 2025</div>
 
-    <!-- ГЛАВНАЯ -->
-    <div id="page-home" class="page active">
-        <div style="max-width: 420px; margin-bottom: 40px;">
-            <h3 style="margin-bottom: 16px;">Выберите класс для теста</h3>
-            <select id="class-select">
-                <option value="">— Выберите класс —</option>
-                <option value="5">5 класс</option>
-                <option value="6">6 класс</option>
-                <option value="7">7 класс</option>
-                <option value="8">8 класс</option>
-                <option value="9">9 класс</option>
-                <option value="10">10 класс</option>
-                <option value="11">11 класс</option>
-            </select>
-            <div id="start-msg"></div>
-            <button class="btn-primary" style="width:100%; padding:13px; font-size:1.05rem;" onclick="startTest()">▶ Начать тест</button>
-            <div class="blessing">благословлю бинари за то что дал мне возможность пользоваться кривой платформой, разработанной Дзюбой</div>
-        </div>
-
-        <h3>Таблица лидеров</h3><br>
-        <div class="tabs" id="leaderboard-tabs">
-            <div class="tab" data-cls="5" onclick="renderLeaderboard('5')">5 класс</div>
-            <div class="tab" data-cls="6" onclick="renderLeaderboard('6')">6 класс</div>
-            <div class="tab" data-cls="7" onclick="renderLeaderboard('7')">7 класс</div>
-            <div class="tab" data-cls="8" onclick="renderLeaderboard('8')">8 класс</div>
-            <div class="tab" data-cls="9" onclick="renderLeaderboard('9')">9 класс</div>
-            <div class="tab active" data-cls="10" onclick="renderLeaderboard('10')">10 класс</div>
-            <div class="tab" data-cls="11" onclick="renderLeaderboard('11')">11 класс</div>
-        </div>
-        <div style="overflow-x: auto;">
-            <table>
-                <thead><tr><th>Место</th><th>Никнейм</th><th>Класс</th><th>Баллы</th><th>Время</th></tr></thead>
-                <tbody id="leaderboard-body"><tr><td colspan="5">Загрузка...</td></tr></tbody>
-            </table>
-        </div>
+    <!-- ── ГЛАВНАЯ ── -->
+    <div id="s-home" class="screen active">
+        <select id="cls-select">
+            <option value="">— Выберите класс —</option>
+            <option value="5">5 класс</option>
+            <option value="6">6 класс</option>
+            <option value="7">7 класс</option>
+            <option value="8">8 класс</option>
+            <option value="9">9 класс</option>
+            <option value="10">10 класс</option>
+            <option value="11">11 класс</option>
+        </select>
+        <div id="home-err" class="err" style="display:none"></div>
+        <button class="btn btn-orange" onclick="beginTest()">▶ Начать тест</button>
+        <div class="blessing">благословлю бинари за то что дал мне возможность пользоваться кривой платформой, разработанной Дзюбой</div>
     </div>
 
-    <!-- ТЕСТ -->
-    <div id="page-test" class="page">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; align-items: center;">
-            <div id="q-counter" style="color: var(--gray-500)">Вопрос 1</div>
-            <div id="timer-display" class="timer">5:00</div>
-        </div>
-        <div class="progress-container"><div id="q-progress" class="progress-bar"></div></div>
-        <div id="q-text" style="font-size: 1.1rem; margin-bottom: 20px; line-height: 1.6;">Загрузка...</div>
-        <input type="text" id="q-input" placeholder="Ваш ответ..." autocomplete="off">
-        <div id="answered-status" style="font-size:0.8rem; color:var(--gray-500); margin-bottom: 8px;"></div>
-        <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-            <button id="btn-prev" class="btn-secondary" onclick="prevQuestion()">← Назад</button>
-            <button id="btn-next" class="btn-primary">Далее →</button>
-        </div>
+    <!-- ── ЗАГРУЗКА ── -->
+    <div id="s-loading" class="screen">
+        <div class="spinner">Загружаем вопросы...</div>
     </div>
 
-    <!-- РЕЗУЛЬТАТЫ -->
-    <div id="page-results" class="page">
-        <h2 style="text-align: center; margin-bottom: 20px;">Результаты</h2>
-        <div class="results-grid">
-            <div class="result-card">
-                <div class="subtitle">За ответы</div>
-                <div id="res-score" style="font-size:1.5rem;font-weight:bold">0</div>
-            </div>
-            <div class="result-card">
-                <div class="subtitle">Бонус времени</div>
-                <div id="res-bonus" style="font-size:1.5rem;font-weight:bold;color:var(--green)">+0</div>
-            </div>
-            <div class="result-card total">
-                <div style="opacity:0.8;font-size:0.85rem">Итого</div>
-                <div id="res-total" style="font-size:1.5rem;font-weight:bold">0</div>
-            </div>
+    <!-- ── ТЕСТ ── -->
+    <div id="s-test" class="screen">
+        <div class="test-header">
+            <div id="q-num" class="q-num">Вопрос 1 из ?</div>
+            <div id="timer" class="timer">5:00</div>
         </div>
-        <h3>Детализация:</h3><br>
-        <div id="res-details" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;"></div>
-        <div class="flex-row">
-            <button class="btn-secondary" onclick="showPage('home')">На главную</button>
-            <button class="btn-primary" onclick="retakeTest()">Пройти ещё раз</button>
+        <div class="progress-bg"><div id="prog" class="progress-fill" style="width:0%"></div></div>
+        <div id="q-text" class="q-text"></div>
+        <input type="text" id="q-ans" placeholder="Ваш ответ..." autocomplete="off">
+        <div class="nav-row">
+            <button id="btn-prev" class="btn btn-gray" onclick="prev()">← Назад</button>
+            <button id="btn-next" class="btn btn-orange" onclick="next()">Далее →</button>
         </div>
-        <div class="blessing" style="margin-top: 20px;">благословлю бинари за то что дал мне возможность пользоваться кривой платформой, разработанной Дзюбой</div>
+        <div id="ans-hint" class="answered-hint"></div>
     </div>
 
-    <!-- АДМИН -->
-    <div id="page-admin" class="page">
-        <div id="admin-login-block" style="max-width: 400px; margin: 0 auto;">
-            <h3>Вход в админ-панель</h3><br>
-            <input type="password" id="admin-key-input" placeholder="Пароль">
-            <button class="btn-primary" style="width: 100%" onclick="adminLogin()">Войти</button>
-        </div>
-        <div id="admin-content" style="display: none;">
-            <div class="admin-tabs">
-                <div class="admin-tab active" onclick="switchAdminTab('users')">Участники</div>
-                <div class="admin-tab" onclick="switchAdminTab('results')">Результаты</div>
-                <div class="admin-tab" onclick="switchAdminTab('override')">Переоценка</div>
+    <!-- ── ОТПРАВКА ── -->
+    <div id="s-sending" class="screen">
+        <div class="spinner">Проверяем ответы...</div>
+    </div>
+
+    <!-- ── РЕЗУЛЬТАТЫ ── -->
+    <div id="s-results" class="screen">
+        <h2 style="text-align:center;margin-bottom:4px">Результаты</h2>
+        <div class="score-grid">
+            <div class="score-card">
+                <div class="score-label">За ответы</div>
+                <div id="r-score" class="score-val">—</div>
             </div>
-            <div id="admin-users" class="admin-section active" style="overflow-x: auto;">
-                <table><thead><tr><th>Участник</th><th>Класс</th><th>Статус</th><th>Действия</th></tr></thead>
-                <tbody id="admin-users-body"></tbody></table>
+            <div class="score-card">
+                <div class="score-label">Бонус времени</div>
+                <div id="r-bonus" class="score-val" style="color:var(--green)">—</div>
             </div>
-            <div id="admin-results" class="admin-section" style="overflow-x: auto;">
-                <table><thead><tr><th>Участник</th><th>Баллы</th><th>Время</th><th>Действия</th></tr></thead>
-                <tbody id="admin-results-body"></tbody></table>
-            </div>
-            <div id="admin-override" class="admin-section" style="max-width: 500px;">
-                <label><b>Пользователь</b></label>
-                <select id="override-user"><option value="">Выберите...</option></select>
-                <div id="override-answers" style="background: var(--gray-100); padding: 15px; border-radius: 6px; margin-bottom: 15px;"></div>
-                <label><b>ID Вопроса</b></label><input type="text" id="override-qid">
-                <label><b>Новый статус</b></label>
-                <select id="override-status"><option value="true">Верно</option><option value="false">Неверно</option></select>
-                <button class="btn-primary" style="width: 100%" onclick="submitOverride()">Применить</button>
+            <div class="score-card total">
+                <div class="score-label">Итого</div>
+                <div id="r-total" class="score-val">—</div>
             </div>
         </div>
+        <h3 style="margin-bottom:12px">Детализация:</h3>
+        <div id="r-details" class="details-scroll"></div>
+        <div style="display:flex;gap:10px">
+            <button class="btn btn-gray" onclick="go('home')">На главную</button>
+            <button class="btn btn-orange" onclick="retake()">Ещё раз</button>
+        </div>
+        <div class="blessing">благословлю бинари за то что дал мне возможность пользоваться кривой платформой, разработанной Дзюбой</div>
     </div>
 </div>
 
 <script>
-const API_URL = 'https://alphabet-physics.ru/tournament/api.php';
+// CORS-прокси — нужен чтобы браузер не блокировал запросы к чужому серверу
+const PROXY = 'https://corsproxy.io/?';
+const API   = 'https://alphabet-physics.ru/tournament/api.php';
 
-let questions = [], currentQuestionIndex = 0, answers = {}, timeLeft = 300, timerInterval = null;
-let selectedClass = '';
-let adminKey = sessionStorage.getItem('adminKey') || '';
-
-const pages = {
-    home:    document.getElementById('page-home'),
-    test:    document.getElementById('page-test'),
-    results: document.getElementById('page-results'),
-    admin:   document.getElementById('page-admin')
-};
-
-function showPage(id) {
-    Object.values(pages).forEach(p => p.classList.remove('active'));
-    pages[id].classList.add('active');
-    if (id === 'home')  loadLeaderboard();
-    if (id === 'admin') checkAdmin();
+function apiGet(params) {
+    return fetch(PROXY + encodeURIComponent(API + '?' + params)).then(r => r.json());
+}
+function apiPost(params, body) {
+    return fetch(PROXY + encodeURIComponent(API + '?' + params), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    }).then(r => r.json());
 }
 
-// ─── СТАРТ ────────────────────────────────────────────────────────────────
+// Состояние
+let questions = [], idx = 0, answers = {}, timeLeft = 300, timer = null, cls = '';
 
-async function startTest() {
-    const sel = document.getElementById('class-select');
-    const msg = document.getElementById('start-msg');
-    if (!sel.value) { msg.innerHTML = '<span class="error">Выберите класс!</span>'; return; }
-    msg.innerHTML = '<span style="color:var(--gray-500)">Загрузка...</span>';
-    selectedClass = sel.value;
+// Навигация по экранам
+function go(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('s-' + id).classList.add('active');
+}
+
+// ── СТАРТ ───────────────────────────────────────────────────────
+
+async function beginTest() {
+    const sel = document.getElementById('cls-select');
+    const err = document.getElementById('home-err');
+    if (!sel.value) { err.textContent = 'Выберите класс!'; err.style.display='block'; return; }
+    err.style.display = 'none';
+    cls = sel.value;
+    go('loading');
 
     try {
-        const res = await fetch(`${API_URL}?action=questions&class_number=${selectedClass}`).then(r => r.json());
-        if (res.questions && res.questions.length > 0) {
-            questions = res.questions;
-            currentQuestionIndex = 0;
-            answers = {};
-            timeLeft = 300;
-            msg.innerHTML = '';
-            showPage('test');
-            renderQuestion();
-            timerInterval = setInterval(updateTimer, 1000);
-        } else {
-            msg.innerHTML = '<span class="error">Вопросы не найдены для этого класса.</span>';
+        const res = await apiGet(`action=questions&class_number=${cls}`);
+        if (!res.questions || res.questions.length === 0) {
+            go('home');
+            const e = document.getElementById('home-err');
+            e.textContent = 'Вопросы для этого класса не найдены.';
+            e.style.display = 'block';
+            return;
         }
+        questions = res.questions;
+        idx = 0; answers = {}; timeLeft = 300;
+        go('test');
+        renderQ();
+        timer = setInterval(tick, 1000);
     } catch(e) {
-        msg.innerHTML = '<span class="error">Ошибка загрузки. Проверьте интернет.</span>';
+        go('home');
+        const err2 = document.getElementById('home-err');
+        err2.textContent = 'Ошибка загрузки. Проверьте интернет.';
+        err2.style.display = 'block';
     }
 }
 
-function retakeTest() { clearInterval(timerInterval); showPage('home'); }
+function retake() { clearInterval(timer); go('home'); }
 
-// ─── ТАЙМЕР ───────────────────────────────────────────────────────────────
+// ── ТАЙМЕР ──────────────────────────────────────────────────────
 
-function updateTimer() {
+function tick() {
     timeLeft--;
     const m = Math.floor(timeLeft / 60);
     const s = (timeLeft % 60).toString().padStart(2, '0');
-    const el = document.getElementById('timer-display');
+    const el = document.getElementById('timer');
     el.textContent = `${m}:${s}`;
-    if (timeLeft <= 60) el.classList.add('danger');
-    if (timeLeft <= 0) { clearInterval(timerInterval); submitTest(); }
+    el.classList.toggle('red', timeLeft <= 60);
+    if (timeLeft <= 0) { clearInterval(timer); finish(); }
 }
 
-// ─── ВОПРОСЫ ──────────────────────────────────────────────────────────────
+// ── ВОПРОСЫ ─────────────────────────────────────────────────────
 
-function renderQuestion() {
-    const q = questions[currentQuestionIndex];
-    document.getElementById('q-counter').textContent = `Вопрос ${currentQuestionIndex + 1} из ${questions.length}`;
-    document.getElementById('q-progress').style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+function renderQ() {
+    const q = questions[idx];
+    document.getElementById('q-num').textContent  = `Вопрос ${idx + 1} из ${questions.length}`;
+    document.getElementById('prog').style.width   = `${((idx + 1) / questions.length) * 100}%`;
     document.getElementById('q-text').textContent = q.text;
+    document.getElementById('q-ans').value        = answers[q.id] || '';
+    document.getElementById('btn-prev').disabled  = idx === 0;
+    document.getElementById('q-ans').focus();
 
-    const input = document.getElementById('q-input');
-    input.value = answers[q.id] || '';
-    input.focus();
-
-    const answered = Object.values(answers).filter(v => v && v.trim()).length;
-    document.getElementById('answered-status').textContent = answered > 0 ? `Отвечено: ${answered} из ${questions.length}` : '';
-
-    document.getElementById('btn-prev').disabled = currentQuestionIndex === 0;
+    const answered = Object.values(answers).filter(v => v.trim()).length;
+    document.getElementById('ans-hint').textContent =
+        answered > 0 ? `Отвечено: ${answered} из ${questions.length}` : '';
 
     const btnNext = document.getElementById('btn-next');
-    if (currentQuestionIndex === questions.length - 1) {
-        btnNext.textContent = '✓ Завершить';
-        btnNext.className = 'btn-success';
-        btnNext.onclick = () => { saveAnswer(); submitTest(); };
+    if (idx === questions.length - 1) {
+        btnNext.textContent  = '✓ Завершить';
+        btnNext.className    = 'btn btn-green';
     } else {
-        btnNext.textContent = 'Далее →';
-        btnNext.className = 'btn-primary';
-        btnNext.onclick = () => { saveAnswer(); currentQuestionIndex++; renderQuestion(); };
+        btnNext.textContent  = 'Далее →';
+        btnNext.className    = 'btn btn-orange';
     }
 }
 
-function saveAnswer() {
-    const v = document.getElementById('q-input').value.trim();
-    if (v) answers[questions[currentQuestionIndex].id] = v;
+function save() {
+    const v = document.getElementById('q-ans').value.trim();
+    answers[questions[idx].id] = v;
 }
 
-function prevQuestion() { saveAnswer(); currentQuestionIndex--; renderQuestion(); }
+function prev() { save(); idx--; renderQ(); }
 
-document.getElementById('q-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-        saveAnswer();
-        if (currentQuestionIndex < questions.length - 1) { currentQuestionIndex++; renderQuestion(); }
-        else submitTest();
-    }
+function next() {
+    save();
+    if (idx < questions.length - 1) { idx++; renderQ(); }
+    else finish();
+}
+
+document.getElementById('q-ans').addEventListener('keydown', e => {
+    if (e.key === 'Enter') next();
 });
 
-// ─── ОТПРАВКА ─────────────────────────────────────────────────────────────
+// ── ОТПРАВКА ────────────────────────────────────────────────────
 
-async function submitTest() {
-    clearInterval(timerInterval);
-    saveAnswer();
-    const btnNext = document.getElementById('btn-next');
-    btnNext.disabled = true;
-    btnNext.textContent = 'Отправка...';
+async function finish() {
+    clearInterval(timer);
+    save();
+    go('sending');
 
-    const answersArray = Object.keys(answers).map(k => ({ question_id: k, answer: answers[k] }));
-    const timeSpent = 300 - timeLeft;
+    const spent = 300 - timeLeft;
+    const body = {
+        user_id: 'guest',
+        answers: Object.keys(answers).map(k => ({ question_id: k, answer: answers[k] })),
+        time_seconds: spent
+    };
 
     try {
-        const res = await fetch(`${API_URL}?action=submit_answers`, {
-            method: 'POST',
-            body: JSON.stringify({ user_id: 'guest', answers: answersArray, time_seconds: timeSpent })
-        }).then(r => r.json());
-        renderResults(res, answersArray, timeSpent);
+        const res = await apiPost('action=submit_answers', body);
+        showResults(res, spent);
     } catch(e) {
-        renderResults(null, answersArray, timeSpent);
+        showResults(null, spent);
     }
 }
 
-function renderResults(res, answersArray, timeSpent) {
-    showPage('results');
-    if (res && res.score_total !== undefined) {
-        document.getElementById('res-score').textContent  = res.score_answers   ?? 0;
-        document.getElementById('res-bonus').textContent  = '+' + (res.score_time_bonus ?? 0);
-        document.getElementById('res-total').textContent  = res.score_total     ?? 0;
-        document.getElementById('res-details').innerHTML  = (res.details || []).map(d =>
-            `<div class="detail-item" style="background:${d.is_correct ? '#d1fae5' : '#fee2e2'}">
-                <b>Вопрос ${d.question_id}</b>: ${d.is_correct ? '✅ Верно' : '❌ Неверно'}<br>
+// ── РЕЗУЛЬТАТЫ ──────────────────────────────────────────────────
+
+function showResults(res, spent) {
+    go('results');
+
+    if (res && res.details) {
+        // Сервер проверил и вернул оценки
+        document.getElementById('r-score').textContent = res.score_answers   ?? '?';
+        document.getElementById('r-bonus').textContent = '+' + (res.score_time_bonus ?? 0);
+        document.getElementById('r-total').textContent = res.score_total     ?? '?';
+
+        document.getElementById('r-details').innerHTML = res.details.map(d =>
+            `<div class="detail ${d.is_correct ? 'ok' : 'bad'}">
+                <b>Вопрос ${d.question_id}</b> — ${d.is_correct ? '✅ Верно' : '❌ Неверно'}<br>
                 Ваш ответ: <code>${d.user_answer || '—'}</code>
             </div>`
         ).join('');
     } else {
-        document.getElementById('res-score').textContent = '?';
-        document.getElementById('res-bonus').textContent = '+?';
-        document.getElementById('res-total').textContent = '?';
-        document.getElementById('res-details').innerHTML = answersArray.map(a =>
-            `<div class="detail-item" style="background:var(--gray-100)">
-                <b>Вопрос ${a.question_id}</b><br>Ваш ответ: <code>${a.answer || '—'}</code>
-            </div>`
-        ).join('') + `<div style="padding:10px;color:var(--gray-500);font-size:0.85rem;margin-top:8px">
-            ⏱ Время: ${Math.floor(timeSpent/60)}м ${timeSpent%60}с — сервер не подтвердил ответы.
-        </div>`;
+        // Сервер не дал оценку — показываем ответы без проверки
+        const m = Math.floor(spent / 60), s = spent % 60;
+        document.getElementById('r-score').textContent = '?';
+        document.getElementById('r-bonus').textContent = '+?';
+        document.getElementById('r-total').textContent = '?';
+
+        document.getElementById('r-details').innerHTML =
+            Object.keys(answers).map(k =>
+                `<div class="detail skip">
+                    <b>Вопрос ${k}</b><br>
+                    Ваш ответ: <code>${answers[k] || '—'}</code>
+                </div>`
+            ).join('') +
+            `<div style="color:var(--gray-500);font-size:0.8rem;margin-top:10px;padding:10px">
+                ⏱ Время: ${m}м ${s}с — сервер не вернул проверку.
+            </div>`;
     }
 }
-
-// ─── ТАБЛИЦА ЛИДЕРОВ ──────────────────────────────────────────────────────
-
-let leaderboardData = {};
-
-async function loadLeaderboard() {
-    try {
-        leaderboardData = await fetch(`${API_URL}?action=leaderboard`).then(r => r.json());
-        renderLeaderboard('10');
-    } catch(e) {
-        document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5" style="color:var(--gray-500)">Не удалось загрузить</td></tr>';
-    }
-}
-
-function renderLeaderboard(cls) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.cls === cls));
-    const data = leaderboardData[cls] || [];
-    document.getElementById('leaderboard-body').innerHTML = data.length === 0
-        ? '<tr><td colspan="5">Нет данных</td></tr>'
-        : data.map((u, i) => `<tr><td>${i+1}</td><td><b>${u.nickname}</b></td><td>${u.class_full}</td><td style="color:var(--accent);font-weight:bold">${u.score_total}</td><td>${u.time_seconds}с</td></tr>`).join('');
-}
-
-// ─── АДМИН ────────────────────────────────────────────────────────────────
-
-function checkAdmin() {
-    if (adminKey) { document.getElementById('admin-login-block').style.display='none'; loadAdminData(); }
-    else { document.getElementById('admin-login-block').style.display='block'; document.getElementById('admin-content').style.display='none'; }
-}
-
-function adminLogin() {
-    adminKey = document.getElementById('admin-key-input').value;
-    sessionStorage.setItem('adminKey', adminKey);
-    document.getElementById('admin-login-block').style.display = 'none';
-    loadAdminData();
-}
-
-function switchAdminTab(tab) {
-    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
-    document.querySelector(`.admin-tab[onclick*="${tab}"]`).classList.add('active');
-    document.getElementById(`admin-${tab}`).classList.add('active');
-}
-
-let adminResultsData = [];
-
-async function loadAdminData() {
-    document.getElementById('admin-content').style.display = 'block';
-    try {
-        const usersRes = await fetch(`${API_URL}?action=admin_users`, { headers: {'X-Admin-Key': adminKey} }).then(r => r.json());
-        if (usersRes.error) return alert(usersRes.error);
-        document.getElementById('admin-users-body').innerHTML = usersRes.users.map(u =>
-            `<tr><td><b>${u.nickname}</b><br><small style="color:var(--gray-500)">PIN: ${u.pin_code||'—'}</small></td
+</script>
+</body>
+</html>
