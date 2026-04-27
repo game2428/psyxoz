@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Школьный турнир по физике — Тренировка</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #f9fafb; --text: #111827; --accent: #FF6600; --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-300: #d1d5db; --gray-500: #6b7280; --green: #10b981; --red: #ef4444; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'JetBrains Mono', monospace; background: var(--bg); color: var(--text); padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--gray-100); padding-bottom: 20px; margin-bottom: 30px; }
+        h1 { font-size: 1.5rem; color: var(--accent); cursor: pointer; }
+        .subtitle { font-size: 0.85rem; color: var(--gray-500); }
+        .page { display: none; } .page.active { display: block; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--gray-300); border-radius: 6px; font-family: inherit; font-size: 1rem; }
+        button { padding: 10px 20px; border: none; border-radius: 6px; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 1rem; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-secondary { background: var(--gray-200); color: var(--text); }
+        .btn-success { background: var(--green); color: #fff; }
+        .flex-row { display: flex; gap: 10px; margin-bottom: 10px; } .flex-row button { flex: 1; }
+        .error { color: var(--red); text-align: center; display: block; margin-bottom: 10px; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; }
+        .tab { padding: 5px 10px; background: var(--gray-200); border-radius: 4px; cursor: pointer; }
+        .tab.active { background: var(--accent); color: #fff; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--gray-200); }
+        th { background: var(--gray-100); color: var(--gray-500); }
+        .progress-container { background: var(--gray-200); height: 8px; border-radius: 4px; margin-bottom: 20px; }
+        .progress-bar { background: var(--accent); height: 100%; width: 0%; transition: width 0.3s; }
+        .timer { color: var(--accent); font-size: 1.2rem; font-weight: bold; }
+        .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; margin-bottom: 20px; }
+        .result-card { background: var(--gray-100); padding: 15px; border-radius: 8px; }
+        .result-card.total { background: var(--accent); color: #fff; }
+        .detail-item { padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid var(--gray-300); }
+
+        /* Режим тренировки — стартовый экран */
+        .training-box { max-width: 420px; margin: 0 auto; }
+        .training-box h3 { margin-bottom: 6px; }
+        .training-hint { font-size: 0.8rem; color: var(--gray-500); margin-bottom: 20px; }
+        .training-badge { display: inline-block; background: #fff3e0; color: var(--accent); border: 1px solid var(--accent); border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; margin-bottom: 20px; }
+        .loading-spinner { text-align: center; padding: 30px; color: var(--gray-500); }
+
+        /* Таблица лидеров */
+        .leaderboard-section { margin-top: 30px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div>
+            <h1 onclick="showPage('home')">Школьный турнир по физике</h1>
+            <div class="subtitle">Декада синдиката точных наук // 2025</div>
+        </div>
+        <span style="font-size:0.8rem; color:var(--accent); font-weight:bold">🎯 Режим тренировки</span>
+    </header>
+
+    <!-- ГЛАВНАЯ — без регистрации -->
+    <div id="page-home" class="page active">
+        <div class="training-box">
+            <div class="training-badge">⚡ Режим тренировки — без регистрации</div>
+            <h3>Выберите класс и начните тест</h3>
+            <p class="training-hint">Вопросы загружаются с официального сервера. Результаты в таблицу не записываются.</p>
+            <select id="class-select">
+                <option value="">— Выберите класс —</option>
+                <option value="5">5 класс</option>
+                <option value="6">6 класс</option>
+                <option value="7">7 класс</option>
+                <option value="8">8 класс</option>
+                <option value="9">9 класс</option>
+                <option value="10">10 класс</option>
+                <option value="11">11 класс</option>
+            </select>
+            <div id="start-msg" style="color:var(--red);margin-bottom:10px;"></div>
+            <button class="btn-primary" style="width:100%; font-size:1.1rem; padding:14px" onclick="startTraining()">▶ Начать тест</button>
+        </div>
+
+        <div class="leaderboard-section">
+            <h3>Таблица лидеров</h3><br>
+            <div class="tabs" id="leaderboard-tabs">
+                <div class="tab" data-cls="5" onclick="renderLeaderboard('5')">5 кл.</div>
+                <div class="tab" data-cls="6" onclick="renderLeaderboard('6')">6 кл.</div>
+                <div class="tab" data-cls="7" onclick="renderLeaderboard('7')">7 кл.</div>
+                <div class="tab" data-cls="8" onclick="renderLeaderboard('8')">8 кл.</div>
+                <div class="tab" data-cls="9" onclick="renderLeaderboard('9')">9 кл.</div>
+                <div class="tab active" data-cls="10" onclick="renderLeaderboard('10')">10 кл.</div>
+                <div class="tab" data-cls="11" onclick="renderLeaderboard('11')">11 кл.</div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead><tr><th>Место</th><th>Никнейм</th><th>Класс</th><th>Баллы</th><th>Время</th></tr></thead>
+                    <tbody id="leaderboard-body"><tr><td colspan="5" class="loading-spinner">Загрузка...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ТЕСТ -->
+    <div id="page-test" class="page">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold;">
+            <div id="q-counter" style="color: var(--gray-500)">Вопрос 1</div>
+            <div id="timer-display" class="timer">5:00</div>
+        </div>
+        <div class="progress-container"><div id="q-progress" class="progress-bar"></div></div>
+        <div id="q-text" style="font-size: 1.1rem; margin-bottom: 20px; line-height: 1.6;">Загрузка...</div>
+        <input type="text" id="q-input" placeholder="Ваш ответ..." autocomplete="off">
+        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+            <button id="btn-prev" class="btn-secondary" onclick="prevQuestion()">← Назад</button>
+            <button id="btn-next" class="btn-primary">Далее →</button>
+        </div>
+    </div>
+
+    <!-- РЕЗУЛЬТАТЫ -->
+    <div id="page-results" class="page">
+        <h2 style="text-align: center; margin-bottom: 20px;">Результаты тренировки</h2>
+        <div class="results-grid">
+            <div class="result-card"><div class="subtitle">За ответы</div><div id="res-score" style="font-size:1.5rem;font-weight:bold">0</div></div>
+            <div class="result-card"><div class="subtitle">Бонус времени</div><div id="res-bonus" style="font-size:1.5rem;font-weight:bold;color:var(--green)">+0</div></div>
+            <div class="result-card total"><div style="opacity:0.8;font-size:0.85rem">Итого</div><div id="res-total" style="font-size:1.5rem;font-weight:bold">0</div></div>
+        </div>
+        <div id="res-practice-note" style="background:#fff3e0;border:1px solid var(--accent);border-radius:8px;padding:12px;margin-bottom:20px;font-size:0.85rem;color:var(--accent);">
+            ℹ️ Это тренировочный режим. Результаты не отправлены в таблицу лидеров.
+        </div>
+        <h3>Детализация:</h3><br>
+        <div id="res-details" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;"></div>
+        <div class="flex-row">
+            <button class="btn-secondary" onclick="showPage('home')">На главную</button>
+            <button class="btn-primary" onclick="restartTest()">Пройти ещё раз</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_URL = 'https://alphabet-physics.ru/tournament/api.php';
+
+let currentClass = '', questions = [], currentQuestionIndex = 0, answers = {}, timeLeft = 300, timerInterval = null;
+
+const pages = {
+    home: document.getElementById('page-home'),
+    test: document.getElementById('page-test'),
+    results: document.getElementById('page-results')
+};
+
+function showPage(id) {
+    Object.values(pages).forEach(p => p.classList.remove('active'));
+    pages[id].classList.add('active');
+    if (id === 'home') loadLeaderboard();
+}
+
+// ─── СТАРТ ТРЕНИРОВКИ ───────────────────────────────────────────────────────
+
+async function startTraining() {
+    const sel = document.getElementById('class-select');
+    const msg = document.getElementById('start-msg');
+    if (!sel.value) { msg.textContent = 'Выберите класс!'; return; }
+    msg.textContent = '';
+    currentClass = sel.value;
+
+    try {
+        const res = await fetch(`${API_URL}?action=questions&class_number=${currentClass}`).then(r => r.json());
+        if (res.questions && res.questions.length > 0) {
+            questions = res.questions;
+            currentQuestionIndex = 0;
+            answers = {};
+            timeLeft = 300;
+            showPage('test');
+            renderQuestion();
+            timerInterval = setInterval(updateTimer, 1000);
+        } else {
+            msg.textContent = 'Вопросы для этого класса не найдены. Попробуйте другой класс.';
+        }
+    } catch(e) {
+        msg.textContent = 'Ошибка загрузки. Проверьте подключение к интернету.';
+    }
+}
+
+function restartTest() {
+    clearInterval(timerInterval);
+    showPage('home');
+}
+
+// ─── ТАЙМЕР ──────────────────────────────────────────────────────────────────
+
+function updateTimer() {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = (timeLeft % 60).toString().padStart(2, '0');
+    document.getElementById('timer-display').textContent = `${m}:${s}`;
+    if (timeLeft <= 60) document.getElementById('timer-display').style.color = 'var(--red)';
+    if (timeLeft <= 0) { clearInterval(timerInterval); finishTest(); }
+}
+
+// ─── ВОПРОСЫ ─────────────────────────────────────────────────────────────────
+
+function renderQuestion() {
+    const q = questions[currentQuestionIndex];
+    document.getElementById('q-counter').textContent = `Вопрос ${currentQuestionIndex + 1} из ${questions.length}`;
+    document.getElementById('q-progress').style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+    document.getElementById('q-text').textContent = q.text;
+    const input = document.getElementById('q-input');
+    input.value = answers[q.id] || '';
+    input.focus();
+    document.getElementById('btn-prev').disabled = currentQuestionIndex === 0;
+
+    const btnNext = document.getElementById('btn-next');
+    if (currentQuestionIndex === questions.length - 1) {
+        btnNext.textContent = '✓ Завершить';
+        btnNext.className = 'btn-success';
+        btnNext.onclick = () => { saveAnswer(); finishTest(); };
+    } else {
+        btnNext.textContent = 'Далее →';
+        btnNext.className = 'btn-primary';
+        btnNext.onclick = () => { saveAnswer(); currentQuestionIndex++; renderQuestion(); };
+    }
+}
+
+function saveAnswer() {
+    answers[questions[currentQuestionIndex].id] = document.getElementById('q-input').value.trim();
+}
+
+function prevQuestion() { saveAnswer(); currentQuestionIndex--; renderQuestion(); }
+
+document.getElementById('q-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        saveAnswer();
+        if (currentQuestionIndex < questions.length - 1) { currentQuestionIndex++; renderQuestion(); }
+        else finishTest();
+    }
+});
+
+// ─── ЗАВЕРШЕНИЕ И РЕЗУЛЬТАТЫ ──────────────────────────────────────────────────
+
+async function finishTest() {
+    clearInterval(timerInterval);
+    saveAnswer();
+
+    const btnNext = document.getElementById('btn-next');
+    btnNext.disabled = true;
+    btnNext.textContent = 'Отправка...';
+
+    const answersArray = Object.keys(answers).map(k => ({ question_id: k, answer: answers[k] }));
+    const timeSpent = 300 - timeLeft;
+
+    try {
+        // Отправляем ответы на сервер для проверки (без сохранения — guest пользователь будет отклонён сервером)
+        const res = await fetch(`${API_URL}?action=submit_answers`, {
+            method: 'POST',
+            body: JSON.stringify({ user_id: 'guest_training', answers: answersArray, time_seconds: timeSpent })
+        }).then(r => r.json());
+
+        if (res.details || res.score_total !== undefined) {
+            // Сервер вернул результаты
+            showResultsPage(res);
+        } else {
+            // Сервер не принял — показываем локальный отчёт
+            showLocalResults(answersArray, timeSpent);
+        }
+    } catch(e) {
+        showLocalResults(answersArray, timeSpent);
+    }
+}
+
+function showResultsPage(res) {
+    showPage('results');
+    document.getElementById('res-score').textContent = res.score_answers ?? 0;
+    document.getElementById('res-bonus').textContent = '+' + (res.score_time_bonus ?? 0);
+    document.getElementById('res-total').textContent = res.score_total ?? 0;
+
+    document.getElementById('res-details').innerHTML = (res.details || []).map(d =>
+        `<div class="detail-item" style="background:${d.is_correct ? '#d1fae5' : '#fee2e2'}">
+            <b>Вопрос ${d.question_id}</b>: ${d.is_correct ? '✅ Верно' : '❌ Неверно'}<br>
+            Ваш ответ: <code>${d.user_answer || '—'}</code>
+        </div>`
+    ).join('');
+}
+
+function showLocalResults(answersArray, timeSpent) {
+    showPage('results');
+    document.getElementById('res-score').textContent = '—';
+    document.getElementById('res-bonus').textContent = '+—';
+    document.getElementById('res-total').textContent = '—';
+
+    document.getElementById('res-details').innerHTML = answersArray.map(a =>
+        `<div class="detail-item" style="background:var(--gray-100)">
+            <b>Вопрос ${a.question_id}</b><br>
+            Ваш ответ: <code>${a.answer || '—'}</code>
+        </div>`
+    ).join('') + `<div style="padding:10px;color:var(--gray-500);font-size:0.85rem">
+        ⏱ Затраченное время: ${Math.floor(timeSpent/60)}м ${timeSpent%60}с<br>
+        Для точной оценки нужна регистрация на сайте.
+    </div>`;
+}
+
+// ─── ТАБЛИЦА ЛИДЕРОВ ──────────────────────────────────────────────────────────
+
+let leaderboardData = {};
+
+async function loadLeaderboard() {
+    try {
+        leaderboardData = await fetch(`${API_URL}?action=leaderboard`).then(r => r.json());
+        renderLeaderboard('10');
+    } catch(e) {
+        document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5" style="color:var(--gray-500)">Не удалось загрузить таблицу</td></tr>';
+    }
+}
+
+function renderLeaderboard(cls) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.cls === cls));
+    const tbody = document.getElementById('leaderboard-body');
+    const data = leaderboardData[cls] || [];
+    tbody.innerHTML = data.length === 0
+        ? '<tr><td colspan="5">Нет данных</td></tr>'
+        : data.map((u, i) =>
+            `<tr>
+                <td>${i + 1}</td>
+                <td><b>${u.nickname}</b></td>
+                <td>${u.class_full}</td>
+                <td style="color:var(--accent);font-weight:bold">${u.score_total}</td>
+                <td>${u.time_seconds}с</td>
+            </tr>`
+        ).join('');
+}
+
+// Загрузка таблицы при старте
+loadLeaderboard();
+</script>
+</body>
+</html>
+
+<style>
+
+</style>
+<script>
+
+</script>
