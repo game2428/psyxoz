@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Школьный турнир по физике — Тренировка</title>
+    <title>Школьный турнир по физике</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #f9fafb; --text: #111827; --accent: #FF6600; --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-300: #d1d5db; --gray-500: #6b7280; --green: #10b981; --red: #ef4444; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'JetBrains Mono', monospace; background: var(--bg); color: var(--text); padding: 20px; }
         .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--gray-100); padding-bottom: 20px; margin-bottom: 30px; }
+        header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--gray-100); padding-bottom: 20px; margin-bottom: 30px; }
         h1 { font-size: 1.5rem; color: var(--accent); cursor: pointer; }
         .subtitle { font-size: 0.85rem; color: var(--gray-500); }
+        .admin-link { color: var(--gray-300); text-decoration: none; cursor: pointer; font-size: 0.85rem; }
         .page { display: none; } .page.active { display: block; }
         input, select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--gray-300); border-radius: 6px; font-family: inherit; font-size: 1rem; }
         button { padding: 10px 20px; border: none; border-radius: 6px; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 1rem; }
@@ -21,8 +22,9 @@
         .btn-success { background: var(--green); color: #fff; }
         .flex-row { display: flex; gap: 10px; margin-bottom: 10px; } .flex-row button { flex: 1; }
         .error { color: var(--red); text-align: center; display: block; margin-bottom: 10px; }
-        .tabs { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; }
-        .tab { padding: 5px 10px; background: var(--gray-200); border-radius: 4px; cursor: pointer; }
+        .success { color: var(--green); text-align: center; display: block; margin-bottom: 10px; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; flex-wrap: wrap; }
+        .tab { padding: 5px 10px; background: var(--gray-200); border-radius: 4px; cursor: pointer; white-space: nowrap; }
         .tab.active { background: var(--accent); color: #fff; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--gray-200); }
@@ -30,20 +32,18 @@
         .progress-container { background: var(--gray-200); height: 8px; border-radius: 4px; margin-bottom: 20px; }
         .progress-bar { background: var(--accent); height: 100%; width: 0%; transition: width 0.3s; }
         .timer { color: var(--accent); font-size: 1.2rem; font-weight: bold; }
+        .timer.danger { color: var(--red); animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
         .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; margin-bottom: 20px; }
         .result-card { background: var(--gray-100); padding: 15px; border-radius: 8px; }
         .result-card.total { background: var(--accent); color: #fff; }
-        .detail-item { padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid var(--gray-300); }
-
-        /* Режим тренировки — стартовый экран */
-        .training-box { max-width: 420px; margin: 0 auto; }
-        .training-box h3 { margin-bottom: 6px; }
-        .training-hint { font-size: 0.8rem; color: var(--gray-500); margin-bottom: 20px; }
-        .training-badge { display: inline-block; background: #fff3e0; color: var(--accent); border: 1px solid var(--accent); border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; margin-bottom: 20px; }
-        .loading-spinner { text-align: center; padding: 30px; color: var(--gray-500); }
-
-        /* Таблица лидеров */
-        .leaderboard-section { margin-top: 30px; }
+        .detail-item { padding: 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid var(--gray-300); }
+        .admin-tabs { display: flex; gap: 15px; margin-bottom: 20px; border-bottom: 2px solid var(--gray-200); }
+        .admin-tab { padding-bottom: 10px; cursor: pointer; color: var(--gray-500); }
+        .admin-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); font-weight: bold; }
+        .admin-section { display: none; } .admin-section.active { display: block; }
+        .action-link { color: var(--accent); cursor: pointer; text-decoration: underline; margin-right: 10px; }
+        .blessing { font-size: 0.75rem; color: var(--gray-500); text-align: center; margin-top: 16px; font-style: italic; line-height: 1.6; padding: 0 10px; }
     </style>
 </head>
 <body>
@@ -53,15 +53,13 @@
             <h1 onclick="showPage('home')">Школьный турнир по физике</h1>
             <div class="subtitle">Декада синдиката точных наук // 2025</div>
         </div>
-        <span style="font-size:0.8rem; color:var(--accent); font-weight:bold">🎯 Режим тренировки</span>
+        <a class="admin-link" onclick="showPage('admin')">[admin]</a>
     </header>
 
-    <!-- ГЛАВНАЯ — без регистрации -->
+    <!-- ГЛАВНАЯ -->
     <div id="page-home" class="page active">
-        <div class="training-box">
-            <div class="training-badge">⚡ Режим тренировки — без регистрации</div>
-            <h3>Выберите класс и начните тест</h3>
-            <p class="training-hint">Вопросы загружаются с официального сервера. Результаты в таблицу не записываются.</p>
+        <div style="max-width: 420px; margin-bottom: 40px;">
+            <h3 style="margin-bottom: 16px;">Выберите класс для теста</h3>
             <select id="class-select">
                 <option value="">— Выберите класс —</option>
                 <option value="5">5 класс</option>
@@ -72,40 +70,40 @@
                 <option value="10">10 класс</option>
                 <option value="11">11 класс</option>
             </select>
-            <div id="start-msg" style="color:var(--red);margin-bottom:10px;"></div>
-            <button class="btn-primary" style="width:100%; font-size:1.1rem; padding:14px" onclick="startTraining()">▶ Начать тест</button>
+            <div id="start-msg"></div>
+            <button class="btn-primary" style="width:100%; padding:13px; font-size:1.05rem;" onclick="startTest()">▶ Начать тест</button>
+            <div class="blessing">благословлю бинари за то что дал мне возможность пользоваться кривой платформой, разработанной Дзюбой</div>
         </div>
 
-        <div class="leaderboard-section">
-            <h3>Таблица лидеров</h3><br>
-            <div class="tabs" id="leaderboard-tabs">
-                <div class="tab" data-cls="5" onclick="renderLeaderboard('5')">5 кл.</div>
-                <div class="tab" data-cls="6" onclick="renderLeaderboard('6')">6 кл.</div>
-                <div class="tab" data-cls="7" onclick="renderLeaderboard('7')">7 кл.</div>
-                <div class="tab" data-cls="8" onclick="renderLeaderboard('8')">8 кл.</div>
-                <div class="tab" data-cls="9" onclick="renderLeaderboard('9')">9 кл.</div>
-                <div class="tab active" data-cls="10" onclick="renderLeaderboard('10')">10 кл.</div>
-                <div class="tab" data-cls="11" onclick="renderLeaderboard('11')">11 кл.</div>
-            </div>
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead><tr><th>Место</th><th>Никнейм</th><th>Класс</th><th>Баллы</th><th>Время</th></tr></thead>
-                    <tbody id="leaderboard-body"><tr><td colspan="5" class="loading-spinner">Загрузка...</td></tr></tbody>
-                </table>
-            </div>
+        <h3>Таблица лидеров</h3><br>
+        <div class="tabs" id="leaderboard-tabs">
+            <div class="tab" data-cls="5" onclick="renderLeaderboard('5')">5 класс</div>
+            <div class="tab" data-cls="6" onclick="renderLeaderboard('6')">6 класс</div>
+            <div class="tab" data-cls="7" onclick="renderLeaderboard('7')">7 класс</div>
+            <div class="tab" data-cls="8" onclick="renderLeaderboard('8')">8 класс</div>
+            <div class="tab" data-cls="9" onclick="renderLeaderboard('9')">9 класс</div>
+            <div class="tab active" data-cls="10" onclick="renderLeaderboard('10')">10 класс</div>
+            <div class="tab" data-cls="11" onclick="renderLeaderboard('11')">11 класс</div>
+        </div>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead><tr><th>Место</th><th>Никнейм</th><th>Класс</th><th>Баллы</th><th>Время</th></tr></thead>
+                <tbody id="leaderboard-body"><tr><td colspan="5">Загрузка...</td></tr></tbody>
+            </table>
         </div>
     </div>
 
     <!-- ТЕСТ -->
     <div id="page-test" class="page">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; align-items: center;">
             <div id="q-counter" style="color: var(--gray-500)">Вопрос 1</div>
             <div id="timer-display" class="timer">5:00</div>
         </div>
         <div class="progress-container"><div id="q-progress" class="progress-bar"></div></div>
         <div id="q-text" style="font-size: 1.1rem; margin-bottom: 20px; line-height: 1.6;">Загрузка...</div>
         <input type="text" id="q-input" placeholder="Ваш ответ..." autocomplete="off">
-        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+        <div id="answered-status" style="font-size:0.8rem; color:var(--gray-500); margin-bottom: 8px;"></div>
+        <div style="display: flex; justify-content: space-between; margin-top: 10px;">
             <button id="btn-prev" class="btn-secondary" onclick="prevQuestion()">← Назад</button>
             <button id="btn-next" class="btn-primary">Далее →</button>
         </div>
@@ -113,20 +111,60 @@
 
     <!-- РЕЗУЛЬТАТЫ -->
     <div id="page-results" class="page">
-        <h2 style="text-align: center; margin-bottom: 20px;">Результаты тренировки</h2>
+        <h2 style="text-align: center; margin-bottom: 20px;">Результаты</h2>
         <div class="results-grid">
-            <div class="result-card"><div class="subtitle">За ответы</div><div id="res-score" style="font-size:1.5rem;font-weight:bold">0</div></div>
-            <div class="result-card"><div class="subtitle">Бонус времени</div><div id="res-bonus" style="font-size:1.5rem;font-weight:bold;color:var(--green)">+0</div></div>
-            <div class="result-card total"><div style="opacity:0.8;font-size:0.85rem">Итого</div><div id="res-total" style="font-size:1.5rem;font-weight:bold">0</div></div>
-        </div>
-        <div id="res-practice-note" style="background:#fff3e0;border:1px solid var(--accent);border-radius:8px;padding:12px;margin-bottom:20px;font-size:0.85rem;color:var(--accent);">
-            ℹ️ Это тренировочный режим. Результаты не отправлены в таблицу лидеров.
+            <div class="result-card">
+                <div class="subtitle">За ответы</div>
+                <div id="res-score" style="font-size:1.5rem;font-weight:bold">0</div>
+            </div>
+            <div class="result-card">
+                <div class="subtitle">Бонус времени</div>
+                <div id="res-bonus" style="font-size:1.5rem;font-weight:bold;color:var(--green)">+0</div>
+            </div>
+            <div class="result-card total">
+                <div style="opacity:0.8;font-size:0.85rem">Итого</div>
+                <div id="res-total" style="font-size:1.5rem;font-weight:bold">0</div>
+            </div>
         </div>
         <h3>Детализация:</h3><br>
         <div id="res-details" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;"></div>
         <div class="flex-row">
             <button class="btn-secondary" onclick="showPage('home')">На главную</button>
-            <button class="btn-primary" onclick="restartTest()">Пройти ещё раз</button>
+            <button class="btn-primary" onclick="retakeTest()">Пройти ещё раз</button>
+        </div>
+        <div class="blessing" style="margin-top: 20px;">благословлю бинари за то что дал мне возможность пользоваться кривой платформой, разработанной Дзюбой</div>
+    </div>
+
+    <!-- АДМИН -->
+    <div id="page-admin" class="page">
+        <div id="admin-login-block" style="max-width: 400px; margin: 0 auto;">
+            <h3>Вход в админ-панель</h3><br>
+            <input type="password" id="admin-key-input" placeholder="Пароль">
+            <button class="btn-primary" style="width: 100%" onclick="adminLogin()">Войти</button>
+        </div>
+        <div id="admin-content" style="display: none;">
+            <div class="admin-tabs">
+                <div class="admin-tab active" onclick="switchAdminTab('users')">Участники</div>
+                <div class="admin-tab" onclick="switchAdminTab('results')">Результаты</div>
+                <div class="admin-tab" onclick="switchAdminTab('override')">Переоценка</div>
+            </div>
+            <div id="admin-users" class="admin-section active" style="overflow-x: auto;">
+                <table><thead><tr><th>Участник</th><th>Класс</th><th>Статус</th><th>Действия</th></tr></thead>
+                <tbody id="admin-users-body"></tbody></table>
+            </div>
+            <div id="admin-results" class="admin-section" style="overflow-x: auto;">
+                <table><thead><tr><th>Участник</th><th>Баллы</th><th>Время</th><th>Действия</th></tr></thead>
+                <tbody id="admin-results-body"></tbody></table>
+            </div>
+            <div id="admin-override" class="admin-section" style="max-width: 500px;">
+                <label><b>Пользователь</b></label>
+                <select id="override-user"><option value="">Выберите...</option></select>
+                <div id="override-answers" style="background: var(--gray-100); padding: 15px; border-radius: 6px; margin-bottom: 15px;"></div>
+                <label><b>ID Вопроса</b></label><input type="text" id="override-qid">
+                <label><b>Новый статус</b></label>
+                <select id="override-status"><option value="true">Верно</option><option value="false">Неверно</option></select>
+                <button class="btn-primary" style="width: 100%" onclick="submitOverride()">Применить</button>
+            </div>
         </div>
     </div>
 </div>
@@ -134,80 +172,88 @@
 <script>
 const API_URL = 'https://alphabet-physics.ru/tournament/api.php';
 
-let currentClass = '', questions = [], currentQuestionIndex = 0, answers = {}, timeLeft = 300, timerInterval = null;
+let questions = [], currentQuestionIndex = 0, answers = {}, timeLeft = 300, timerInterval = null;
+let selectedClass = '';
+let adminKey = sessionStorage.getItem('adminKey') || '';
 
 const pages = {
-    home: document.getElementById('page-home'),
-    test: document.getElementById('page-test'),
-    results: document.getElementById('page-results')
+    home:    document.getElementById('page-home'),
+    test:    document.getElementById('page-test'),
+    results: document.getElementById('page-results'),
+    admin:   document.getElementById('page-admin')
 };
 
 function showPage(id) {
     Object.values(pages).forEach(p => p.classList.remove('active'));
     pages[id].classList.add('active');
-    if (id === 'home') loadLeaderboard();
+    if (id === 'home')  loadLeaderboard();
+    if (id === 'admin') checkAdmin();
 }
 
-// ─── СТАРТ ТРЕНИРОВКИ ───────────────────────────────────────────────────────
+// ─── СТАРТ ────────────────────────────────────────────────────────────────
 
-async function startTraining() {
+async function startTest() {
     const sel = document.getElementById('class-select');
     const msg = document.getElementById('start-msg');
-    if (!sel.value) { msg.textContent = 'Выберите класс!'; return; }
-    msg.textContent = '';
-    currentClass = sel.value;
+    if (!sel.value) { msg.innerHTML = '<span class="error">Выберите класс!</span>'; return; }
+    msg.innerHTML = '<span style="color:var(--gray-500)">Загрузка...</span>';
+    selectedClass = sel.value;
 
     try {
-        const res = await fetch(`${API_URL}?action=questions&class_number=${currentClass}`).then(r => r.json());
+        const res = await fetch(`${API_URL}?action=questions&class_number=${selectedClass}`).then(r => r.json());
         if (res.questions && res.questions.length > 0) {
             questions = res.questions;
             currentQuestionIndex = 0;
             answers = {};
             timeLeft = 300;
+            msg.innerHTML = '';
             showPage('test');
             renderQuestion();
             timerInterval = setInterval(updateTimer, 1000);
         } else {
-            msg.textContent = 'Вопросы для этого класса не найдены. Попробуйте другой класс.';
+            msg.innerHTML = '<span class="error">Вопросы не найдены для этого класса.</span>';
         }
     } catch(e) {
-        msg.textContent = 'Ошибка загрузки. Проверьте подключение к интернету.';
+        msg.innerHTML = '<span class="error">Ошибка загрузки. Проверьте интернет.</span>';
     }
 }
 
-function restartTest() {
-    clearInterval(timerInterval);
-    showPage('home');
-}
+function retakeTest() { clearInterval(timerInterval); showPage('home'); }
 
-// ─── ТАЙМЕР ──────────────────────────────────────────────────────────────────
+// ─── ТАЙМЕР ───────────────────────────────────────────────────────────────
 
 function updateTimer() {
     timeLeft--;
     const m = Math.floor(timeLeft / 60);
     const s = (timeLeft % 60).toString().padStart(2, '0');
-    document.getElementById('timer-display').textContent = `${m}:${s}`;
-    if (timeLeft <= 60) document.getElementById('timer-display').style.color = 'var(--red)';
-    if (timeLeft <= 0) { clearInterval(timerInterval); finishTest(); }
+    const el = document.getElementById('timer-display');
+    el.textContent = `${m}:${s}`;
+    if (timeLeft <= 60) el.classList.add('danger');
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitTest(); }
 }
 
-// ─── ВОПРОСЫ ─────────────────────────────────────────────────────────────────
+// ─── ВОПРОСЫ ──────────────────────────────────────────────────────────────
 
 function renderQuestion() {
     const q = questions[currentQuestionIndex];
     document.getElementById('q-counter').textContent = `Вопрос ${currentQuestionIndex + 1} из ${questions.length}`;
     document.getElementById('q-progress').style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
     document.getElementById('q-text').textContent = q.text;
+
     const input = document.getElementById('q-input');
     input.value = answers[q.id] || '';
     input.focus();
+
+    const answered = Object.values(answers).filter(v => v && v.trim()).length;
+    document.getElementById('answered-status').textContent = answered > 0 ? `Отвечено: ${answered} из ${questions.length}` : '';
+
     document.getElementById('btn-prev').disabled = currentQuestionIndex === 0;
 
     const btnNext = document.getElementById('btn-next');
     if (currentQuestionIndex === questions.length - 1) {
         btnNext.textContent = '✓ Завершить';
         btnNext.className = 'btn-success';
-        btnNext.onclick = () => { saveAnswer(); finishTest(); };
+        btnNext.onclick = () => { saveAnswer(); submitTest(); };
     } else {
         btnNext.textContent = 'Далее →';
         btnNext.className = 'btn-primary';
@@ -216,25 +262,25 @@ function renderQuestion() {
 }
 
 function saveAnswer() {
-    answers[questions[currentQuestionIndex].id] = document.getElementById('q-input').value.trim();
+    const v = document.getElementById('q-input').value.trim();
+    if (v) answers[questions[currentQuestionIndex].id] = v;
 }
 
 function prevQuestion() { saveAnswer(); currentQuestionIndex--; renderQuestion(); }
 
-document.getElementById('q-input').addEventListener('keydown', (e) => {
+document.getElementById('q-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') {
         saveAnswer();
         if (currentQuestionIndex < questions.length - 1) { currentQuestionIndex++; renderQuestion(); }
-        else finishTest();
+        else submitTest();
     }
 });
 
-// ─── ЗАВЕРШЕНИЕ И РЕЗУЛЬТАТЫ ──────────────────────────────────────────────────
+// ─── ОТПРАВКА ─────────────────────────────────────────────────────────────
 
-async function finishTest() {
+async function submitTest() {
     clearInterval(timerInterval);
     saveAnswer();
-
     const btnNext = document.getElementById('btn-next');
     btnNext.disabled = true;
     btnNext.textContent = 'Отправка...';
@@ -243,56 +289,43 @@ async function finishTest() {
     const timeSpent = 300 - timeLeft;
 
     try {
-        // Отправляем ответы на сервер для проверки (без сохранения — guest пользователь будет отклонён сервером)
         const res = await fetch(`${API_URL}?action=submit_answers`, {
             method: 'POST',
-            body: JSON.stringify({ user_id: 'guest_training', answers: answersArray, time_seconds: timeSpent })
+            body: JSON.stringify({ user_id: 'guest', answers: answersArray, time_seconds: timeSpent })
         }).then(r => r.json());
-
-        if (res.details || res.score_total !== undefined) {
-            // Сервер вернул результаты
-            showResultsPage(res);
-        } else {
-            // Сервер не принял — показываем локальный отчёт
-            showLocalResults(answersArray, timeSpent);
-        }
+        renderResults(res, answersArray, timeSpent);
     } catch(e) {
-        showLocalResults(answersArray, timeSpent);
+        renderResults(null, answersArray, timeSpent);
     }
 }
 
-function showResultsPage(res) {
+function renderResults(res, answersArray, timeSpent) {
     showPage('results');
-    document.getElementById('res-score').textContent = res.score_answers ?? 0;
-    document.getElementById('res-bonus').textContent = '+' + (res.score_time_bonus ?? 0);
-    document.getElementById('res-total').textContent = res.score_total ?? 0;
-
-    document.getElementById('res-details').innerHTML = (res.details || []).map(d =>
-        `<div class="detail-item" style="background:${d.is_correct ? '#d1fae5' : '#fee2e2'}">
-            <b>Вопрос ${d.question_id}</b>: ${d.is_correct ? '✅ Верно' : '❌ Неверно'}<br>
-            Ваш ответ: <code>${d.user_answer || '—'}</code>
-        </div>`
-    ).join('');
+    if (res && res.score_total !== undefined) {
+        document.getElementById('res-score').textContent  = res.score_answers   ?? 0;
+        document.getElementById('res-bonus').textContent  = '+' + (res.score_time_bonus ?? 0);
+        document.getElementById('res-total').textContent  = res.score_total     ?? 0;
+        document.getElementById('res-details').innerHTML  = (res.details || []).map(d =>
+            `<div class="detail-item" style="background:${d.is_correct ? '#d1fae5' : '#fee2e2'}">
+                <b>Вопрос ${d.question_id}</b>: ${d.is_correct ? '✅ Верно' : '❌ Неверно'}<br>
+                Ваш ответ: <code>${d.user_answer || '—'}</code>
+            </div>`
+        ).join('');
+    } else {
+        document.getElementById('res-score').textContent = '?';
+        document.getElementById('res-bonus').textContent = '+?';
+        document.getElementById('res-total').textContent = '?';
+        document.getElementById('res-details').innerHTML = answersArray.map(a =>
+            `<div class="detail-item" style="background:var(--gray-100)">
+                <b>Вопрос ${a.question_id}</b><br>Ваш ответ: <code>${a.answer || '—'}</code>
+            </div>`
+        ).join('') + `<div style="padding:10px;color:var(--gray-500);font-size:0.85rem;margin-top:8px">
+            ⏱ Время: ${Math.floor(timeSpent/60)}м ${timeSpent%60}с — сервер не подтвердил ответы.
+        </div>`;
+    }
 }
 
-function showLocalResults(answersArray, timeSpent) {
-    showPage('results');
-    document.getElementById('res-score').textContent = '—';
-    document.getElementById('res-bonus').textContent = '+—';
-    document.getElementById('res-total').textContent = '—';
-
-    document.getElementById('res-details').innerHTML = answersArray.map(a =>
-        `<div class="detail-item" style="background:var(--gray-100)">
-            <b>Вопрос ${a.question_id}</b><br>
-            Ваш ответ: <code>${a.answer || '—'}</code>
-        </div>`
-    ).join('') + `<div style="padding:10px;color:var(--gray-500);font-size:0.85rem">
-        ⏱ Затраченное время: ${Math.floor(timeSpent/60)}м ${timeSpent%60}с<br>
-        Для точной оценки нужна регистрация на сайте.
-    </div>`;
-}
-
-// ─── ТАБЛИЦА ЛИДЕРОВ ──────────────────────────────────────────────────────────
+// ─── ТАБЛИЦА ЛИДЕРОВ ──────────────────────────────────────────────────────
 
 let leaderboardData = {};
 
@@ -301,36 +334,45 @@ async function loadLeaderboard() {
         leaderboardData = await fetch(`${API_URL}?action=leaderboard`).then(r => r.json());
         renderLeaderboard('10');
     } catch(e) {
-        document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5" style="color:var(--gray-500)">Не удалось загрузить таблицу</td></tr>';
+        document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5" style="color:var(--gray-500)">Не удалось загрузить</td></tr>';
     }
 }
 
 function renderLeaderboard(cls) {
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.cls === cls));
-    const tbody = document.getElementById('leaderboard-body');
     const data = leaderboardData[cls] || [];
-    tbody.innerHTML = data.length === 0
+    document.getElementById('leaderboard-body').innerHTML = data.length === 0
         ? '<tr><td colspan="5">Нет данных</td></tr>'
-        : data.map((u, i) =>
-            `<tr>
-                <td>${i + 1}</td>
-                <td><b>${u.nickname}</b></td>
-                <td>${u.class_full}</td>
-                <td style="color:var(--accent);font-weight:bold">${u.score_total}</td>
-                <td>${u.time_seconds}с</td>
-            </tr>`
-        ).join('');
+        : data.map((u, i) => `<tr><td>${i+1}</td><td><b>${u.nickname}</b></td><td>${u.class_full}</td><td style="color:var(--accent);font-weight:bold">${u.score_total}</td><td>${u.time_seconds}с</td></tr>`).join('');
 }
 
-// Загрузка таблицы при старте
-loadLeaderboard();
-</script>
-</body>
-</html>
+// ─── АДМИН ────────────────────────────────────────────────────────────────
 
-<style>
+function checkAdmin() {
+    if (adminKey) { document.getElementById('admin-login-block').style.display='none'; loadAdminData(); }
+    else { document.getElementById('admin-login-block').style.display='block'; document.getElementById('admin-content').style.display='none'; }
+}
 
-</style>
-<script>
+function adminLogin() {
+    adminKey = document.getElementById('admin-key-input').value;
+    sessionStorage.setItem('adminKey', adminKey);
+    document.getElementById('admin-login-block').style.display = 'none';
+    loadAdminData();
+}
 
-</script>
+function switchAdminTab(tab) {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+    document.querySelector(`.admin-tab[onclick*="${tab}"]`).classList.add('active');
+    document.getElementById(`admin-${tab}`).classList.add('active');
+}
+
+let adminResultsData = [];
+
+async function loadAdminData() {
+    document.getElementById('admin-content').style.display = 'block';
+    try {
+        const usersRes = await fetch(`${API_URL}?action=admin_users`, { headers: {'X-Admin-Key': adminKey} }).then(r => r.json());
+        if (usersRes.error) return alert(usersRes.error);
+        document.getElementById('admin-users-body').innerHTML = usersRes.users.map(u =>
+            `<tr><td><b>${u.nickname}</b><br><small style="color:var(--gray-500)">PIN: ${u.pin_code||'—'}</small></td
