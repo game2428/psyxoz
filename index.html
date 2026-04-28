@@ -1,332 +1,310 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Физика — 7 класс</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --accent: #FF6600;
-            --g100: #f3f4f6; --g200: #e5e7eb; --g300: #d1d5db; --g500: #6b7280;
-            --green: #10b981; --red: #ef4444;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'JetBrains Mono', monospace; background: #f9fafb; color: #111827; padding: 20px; }
-        .wrap { max-width: 680px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-        h1 { font-size: 1.35rem; color: var(--accent); margin-bottom: 4px; }
-        .sub { font-size: 0.78rem; color: var(--g500); margin-bottom: 26px; }
+import { useState, useEffect, useRef, useCallback } from "react";
 
-        .screen { display: none; }
-        .screen.active { display: block; }
-
-        /* inputs & buttons */
-        select, input[type="text"] {
-            width: 100%; padding: 11px 14px; border: 1.5px solid var(--g300);
-            border-radius: 8px; font-family: inherit; font-size: 1rem;
-            margin-bottom: 14px; outline: none; transition: border-color .2s;
-        }
-        select:focus, input:focus { border-color: var(--accent); }
-        .btn { width: 100%; padding: 13px; border: none; border-radius: 8px; font-family: inherit; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity .15s; }
-        .btn:hover:not(:disabled) { opacity: .85; }
-        .btn:disabled { opacity: .45; cursor: default; }
-        .btn-or  { background: var(--accent); color: #fff; }
-        .btn-gr  { background: var(--g200); color: #111; }
-        .btn-gn  { background: var(--green); color: #fff; }
-        .row2 { display: flex; gap: 10px; }
-        .row2 .btn { flex: 1; }
-
-        /* спиннер */
-        .spinner { text-align: center; padding: 50px 0; color: var(--g500); font-size: 0.9rem; }
-        .spin-ring {
-            display: inline-block; width: 34px; height: 34px; margin-top: 14px;
-            border: 3px solid var(--g200); border-top-color: var(--accent);
-            border-radius: 50%; animation: spin .7s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* тест */
-        .test-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-        .qnum { color: var(--g500); font-size: 0.85rem; }
-        .timer { font-size: 1.25rem; font-weight: 700; color: var(--accent); }
-        .timer.red { color: var(--red); animation: blink 1s step-start infinite; }
-        @keyframes blink { 50% { opacity: .35; } }
-        .pbar-bg { background: var(--g200); height: 5px; border-radius: 3px; margin-bottom: 20px; }
-        .pbar    { background: var(--accent); height: 100%; border-radius: 3px; transition: width .3s; }
-        .qtext { font-size: 1.05rem; line-height: 1.75; margin-bottom: 20px; }
-        .hint { font-size: 0.76rem; color: var(--g500); text-align: right; margin-top: 6px; }
-
-        /* результаты */
-        .sgrid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 18px 0 22px; }
-        .scard { background: var(--g100); border-radius: 8px; padding: 14px; text-align: center; }
-        .scard.tot { background: var(--accent); color: #fff; }
-        .slbl { font-size: 0.72rem; opacity: .75; margin-bottom: 5px; }
-        .sval { font-size: 1.55rem; font-weight: 700; }
-        .dlist { max-height: 400px; overflow-y: auto; margin-bottom: 16px; }
-        .ditem { padding: 11px 14px; border-radius: 8px; margin-bottom: 8px; font-size: 0.88rem; line-height: 1.5; }
-        .ditem.ok   { background: #d1fae5; border-left: 4px solid var(--green); }
-        .ditem.bad  { background: #fee2e2; border-left: 4px solid var(--red); }
-        .ditem.skip { background: var(--g100); border-left: 4px solid var(--g300); }
-        code { background: rgba(0,0,0,.07); padding: 1px 5px; border-radius: 3px; }
-
-        /* ошибка */
-        .errmsg { color: var(--red); font-size: 0.83rem; margin-bottom: 10px; text-align: center; min-height: 1.2em; }
-
-        .blessing { font-size: 0.7rem; color: var(--g500); font-style: italic; text-align: center; margin-top: 22px; line-height: 1.65; }
-
-        /* прогресс проверки */
-        .checking-info { font-size: 0.82rem; color: var(--g500); text-align: center; margin-top: 10px; }
-    </style>
-</head>
-<body>
-<div class="wrap">
-    <h1>Школьный турнир по физике</h1>
-    <div class="sub">Декада синдиката точных наук // 2025 · 7 класс</div>
-
-    <!-- ГЛАВНАЯ -->
-    <div id="s-home" class="screen active">
-        <div class="errmsg" id="home-err"></div>
-        <button class="btn btn-or" onclick="beginTest()">▶ Начать тест (7 класс)</button>
-        <div class="blessing">благословлю бинари за то что дал мне возможность пользоваться кривой платформой, разработанной Дзюбой</div>
-    </div>
-
-    <!-- ЗАГРУЗКА ВОПРОСОВ -->
-    <div id="s-loading" class="screen">
-        <div class="spinner">
-            Загружаем вопросы...<br>
-            <div class="spin-ring"></div>
-        </div>
-    </div>
-
-    <!-- ТЕСТ -->
-    <div id="s-test" class="screen">
-        <div class="test-top">
-            <div id="qnum" class="qnum">Вопрос 1 из ?</div>
-            <div id="timer" class="timer">5:00</div>
-        </div>
-        <div class="pbar-bg"><div id="pbar" class="pbar" style="width:0%"></div></div>
-        <div id="qtext" class="qtext"></div>
-        <input type="text" id="qans" placeholder="Ваш ответ..." autocomplete="off">
-        <div class="row2">
-            <button id="btn-prev" class="btn btn-gr" onclick="prev()">← Назад</button>
-            <button id="btn-next" class="btn btn-or" onclick="next()">Далее →</button>
-        </div>
-        <div id="ans-hint" class="hint"></div>
-    </div>
-
-    <!-- ПРОВЕРКА ИИ -->
-    <div id="s-checking" class="screen">
-        <div class="spinner">
-            Проверяем ответы через ИИ...<br>
-            <div class="spin-ring"></div>
-        </div>
-        <div id="check-progress" class="checking-info"></div>
-    </div>
-
-    <!-- РЕЗУЛЬТАТЫ -->
-    <div id="s-results" class="screen">
-        <h2 style="text-align:center;margin-bottom:4px">Результаты</h2>
-        <div class="sgrid">
-            <div class="scard"><div class="slbl">Верных</div><div id="r-ok" class="sval">0</div></div>
-            <div class="scard"><div class="slbl">Неверных</div><div id="r-bad" class="sval" style="color:var(--red)">0</div></div>
-            <div class="scard tot"><div class="slbl">Баллов</div><div id="r-total" class="sval">0</div></div>
-        </div>
-        <h3 style="margin-bottom:12px">Детализация:</h3>
-        <div id="r-details" class="dlist"></div>
-        <div class="row2">
-            <button class="btn btn-gr" onclick="go('home')">На главную</button>
-            <button class="btn btn-or" onclick="retake()">Ещё раз</button>
-        </div>
-        <div class="blessing">благословлю бинари за то что дал мне возможность пользоваться кривой платформой, разработанной Дзюбой</div>
-    </div>
-</div>
-
-<script>
-// ── НАСТРОЙКИ ──────────────────────────────────────────────────────────────
 const PROXIES = [
-    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    url => `https://thingproxy.freeboard.io/fetch/${url}`,
-    url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  (url) => `https://thingproxy.freeboard.io/fetch/${url}`,
+  (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
 ];
-const API_BASE = 'https://alphabet-physics.ru/tournament/api.php';
-const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
+const API_BASE = "https://alphabet-physics.ru/tournament/api.php";
 
-// ── СОСТОЯНИЕ ──────────────────────────────────────────────────────────────
-let questions = [], idx = 0, answers = {}, timeLeft = 300, clockId = null;
-
-// ── ЭКРАНЫ ─────────────────────────────────────────────────────────────────
-function go(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('s-' + id).classList.add('active');
-}
-
-// ── ЗАГРУЗКА ВОПРОСОВ ЧЕРЕЗ ПРОКСИ ─────────────────────────────────────────
 async function fetchWithProxies(url) {
-    for (const makeProxy of PROXIES) {
-        try {
-            const proxyUrl = makeProxy(url);
-            const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(6000) });
-            if (!res.ok) continue;
-            const text = await res.text();
-            return JSON.parse(text);
-        } catch(e) { continue; }
-    }
-    throw new Error('Все прокси недоступны');
-}
-
-async function beginTest() {
-    document.getElementById('home-err').textContent = '';
-    go('loading');
+  for (const makeProxy of PROXIES) {
     try {
-        const data = await fetchWithProxies(`${API_BASE}?action=questions&class_number=7`);
-        if (!data.questions || data.questions.length === 0) throw new Error('Вопросы не найдены');
-        questions = data.questions;
-        idx = 0; answers = {}; timeLeft = 300;
-        go('test');
-        renderQ();
-        clockId = setInterval(tick, 1000);
-    } catch(e) {
-        go('home');
-        document.getElementById('home-err').textContent = 'Ошибка: ' + e.message + '. Проверьте интернет.';
-    }
+      const res = await fetch(makeProxy(url), { signal: AbortSignal.timeout(7000) });
+      if (!res.ok) continue;
+      const text = await res.text();
+      return JSON.parse(text);
+    } catch (e) { continue; }
+  }
+  throw new Error("Сервер недоступен");
 }
 
-function retake() { clearInterval(clockId); go('home'); }
-
-// ── ТАЙМЕР ─────────────────────────────────────────────────────────────────
-function tick() {
-    timeLeft--;
-    const m = Math.floor(timeLeft / 60);
-    const s = (timeLeft % 60).toString().padStart(2, '0');
-    const el = document.getElementById('timer');
-    el.textContent = `${m}:${s}`;
-    el.classList.toggle('red', timeLeft <= 60);
-    if (timeLeft <= 0) { clearInterval(clockId); finish(); }
-}
-
-// ── ВОПРОСЫ ────────────────────────────────────────────────────────────────
-function renderQ() {
-    const q = questions[idx];
-    document.getElementById('qnum').textContent  = `Вопрос ${idx + 1} из ${questions.length}`;
-    document.getElementById('pbar').style.width  = `${((idx + 1) / questions.length) * 100}%`;
-    document.getElementById('qtext').textContent = q.text;
-    document.getElementById('qans').value        = answers[q.id] || '';
-    document.getElementById('btn-prev').disabled = idx === 0;
-    document.getElementById('qans').focus();
-
-    const done = Object.values(answers).filter(v => v && v.trim()).length;
-    document.getElementById('ans-hint').textContent = done > 0 ? `Отвечено: ${done} из ${questions.length}` : '';
-
-    const bn = document.getElementById('btn-next');
-    if (idx === questions.length - 1) {
-        bn.textContent = '✓ Завершить'; bn.className = 'btn btn-gn';
-    } else {
-        bn.textContent = 'Далее →'; bn.className = 'btn btn-or';
-    }
-}
-
-function save() {
-    const v = document.getElementById('qans').value.trim();
-    answers[questions[idx].id] = v;
-}
-function prev() { save(); idx--; renderQ(); }
-function next() { save(); if (idx < questions.length - 1) { idx++; renderQ(); } else finish(); }
-document.getElementById('qans').addEventListener('keydown', e => { if (e.key === 'Enter') next(); });
-
-// ── ПРОВЕРКА ЧЕРЕЗ CLAUDE AI ───────────────────────────────────────────────
-async function checkOneAnswer(questionText, userAnswer) {
-    if (!userAnswer || !userAnswer.trim()) return { correct: false, comment: 'Нет ответа' };
-
-    const prompt = `Ты строгий учитель физики. Проверь ответ ученика 7 класса.
-
+async function checkAnswer(questionText, userAnswer) {
+  if (!userAnswer || !userAnswer.trim()) return { correct: false, comment: "Нет ответа" };
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 150,
+      messages: [{
+        role: "user",
+        content: `Ты учитель физики. Проверь ответ ученика 7 класса.
 Вопрос: ${questionText}
-Ответ ученика: ${userAnswer}
+Ответ ученика: "${userAnswer}"
+Ответь ТОЛЬКО JSON без лишнего текста:
+{"correct": true/false, "comment": "1 предложение почему"}
+Правила: числа ±5%, синонимы верны, единицы важны.`
+      }]
+    })
+  });
+  const data = await res.json();
+  const text = data.content?.[0]?.text || "{}";
+  try {
+    return JSON.parse(text.replace(/```json|```/g, "").trim());
+  } catch {
+    return { correct: text.toLowerCase().includes("true"), comment: text.slice(0, 100) };
+  }
+}
 
-Ответь строго в формате JSON:
-{"correct": true/false, "comment": "краткое объяснение (1 предложение)"}
+const accent = "#FF6600";
+const green = "#10b981";
+const red = "#ef4444";
 
-Правила:
-- Числа должны совпадать с правильным ответом (допуск ±5%)
-- Единицы измерения важны
-- Синонимы и перефразирования считаются верными
-- Ответь ТОЛЬКО JSON, без лишнего текста`;
+export default function App() {
+  const [screen, setScreen] = useState("home"); // home | loading | test | checking | results
+  const [questions, setQuestions] = useState([]);
+  const [idx, setIdx] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [timeLeft, setTimeLeft] = useState(300);
+  const [inputVal, setInputVal] = useState("");
+  const [homeErr, setHomeErr] = useState("");
+  const [checkProgress, setCheckProgress] = useState("");
+  const [results, setResults] = useState([]);
+  const [timeSpent, setTimeSpent] = useState(0);
+  const clockRef = useRef(null);
+  const inputRef = useRef(null);
 
-    const res = await fetch(ANTHROPIC_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 120,
-            messages: [{ role: 'user', content: prompt }]
-        })
-    });
+  const stopClock = useCallback(() => { if (clockRef.current) clearInterval(clockRef.current); }, []);
 
-    const data = await res.json();
-    const text = data.content?.[0]?.text || '{}';
+  useEffect(() => {
+    if (screen === "test") {
+      inputRef.current?.focus();
+      clockRef.current = setInterval(() => {
+        setTimeLeft(t => {
+          if (t <= 1) { stopClock(); return 0; }
+          return t - 1;
+        });
+      }, 1000);
+      return () => stopClock();
+    }
+  }, [screen]);
+
+  // автофиниш по таймеру
+  useEffect(() => {
+    if (screen === "test" && timeLeft === 0) finish(answers, questions, 300);
+  }, [timeLeft, screen]);
+
+  const fmtTime = (s) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
+
+  const saveAndGet = (currentAnswers, q) => {
+    const val = inputVal.trim();
+    const updated = { ...currentAnswers, [q.id]: val };
+    setAnswers(updated);
+    return updated;
+  };
+
+  async function beginTest() {
+    setHomeErr("");
+    setScreen("loading");
     try {
-        const clean = text.replace(/```json|```/g, '').trim();
-        return JSON.parse(clean);
-    } catch(e) {
-        const lower = text.toLowerCase();
-        return { correct: lower.includes('true') || lower.includes('верно'), comment: text.slice(0, 80) };
+      const data = await fetchWithProxies(`${API_BASE}?action=questions&class_number=7`);
+      if (!data.questions?.length) throw new Error("Вопросы не найдены");
+      setQuestions(data.questions);
+      setIdx(0);
+      setAnswers({});
+      setInputVal("");
+      setTimeLeft(300);
+      setScreen("test");
+    } catch (e) {
+      setHomeErr("Ошибка загрузки: " + e.message);
+      setScreen("home");
     }
-}
+  }
 
-// ── ФИНИШ ──────────────────────────────────────────────────────────────────
-async function finish() {
-    clearInterval(clockId);
-    save();
-    go('checking');
-
-    const spent = 300 - timeLeft;
-    const results = [];
-    const progressEl = document.getElementById('check-progress');
-
-    for (let i = 0; i < questions.length; i++) {
-        const q = questions[i];
-        const userAns = answers[q.id] || '';
-        progressEl.textContent = `Проверяю вопрос ${i + 1} из ${questions.length}...`;
-        try {
-            const check = await checkOneAnswer(q.text, userAns);
-            results.push({ q, userAns, correct: check.correct, comment: check.comment || '' });
-        } catch(e) {
-            results.push({ q, userAns, correct: false, comment: 'Ошибка проверки' });
-        }
+  function goNext() {
+    const q = questions[idx];
+    const updated = saveAndGet(answers, q);
+    if (idx < questions.length - 1) {
+      setIdx(idx + 1);
+      setInputVal(updated[questions[idx + 1]?.id] || "");
+    } else {
+      finish(updated, questions, timeLeft);
     }
+  }
 
-    showResults(results, spent);
+  function goPrev() {
+    const q = questions[idx];
+    const updated = saveAndGet(answers, q);
+    setIdx(idx - 1);
+    setInputVal(updated[questions[idx - 1]?.id] || "");
+  }
+
+  async function finish(finalAnswers, qs, tLeft) {
+    stopClock();
+    const spent = 300 - tLeft;
+    setTimeSpent(spent);
+    setScreen("checking");
+    const res = [];
+    for (let i = 0; i < qs.length; i++) {
+      const q = qs[i];
+      setCheckProgress(`Проверяю вопрос ${i + 1} из ${qs.length}...`);
+      try {
+        const check = await checkAnswer(q.text, finalAnswers[q.id] || "");
+        res.push({ q, userAns: finalAnswers[q.id] || "", correct: check.correct, comment: check.comment || "" });
+      } catch {
+        res.push({ q, userAns: finalAnswers[q.id] || "", correct: false, comment: "Ошибка проверки" });
+      }
+    }
+    setResults(res);
+    setScreen("results");
+  }
+
+  function retake() {
+    stopClock();
+    setScreen("home");
+    setIdx(0);
+    setAnswers({});
+    setInputVal("");
+    setTimeLeft(300);
+    setResults([]);
+    setHomeErr("");
+  }
+
+  const Spinner = ({ text }) => (
+    <div style={{ textAlign: "center", padding: "60px 0", color: "#6b7280" }}>
+      <div>{text}</div>
+      <div style={{
+        display: "inline-block", width: 36, height: 36, marginTop: 16,
+        border: "3px solid #e5e7eb", borderTopColor: accent,
+        borderRadius: "50%", animation: "spin .7s linear infinite"
+      }} />
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
+
+  const Blessing = () => (
+    <div style={{ fontSize: "0.7rem", color: "#9ca3af", fontStyle: "italic", textAlign: "center", marginTop: 24, lineHeight: 1.7 }}>
+      благословлю бинари за то что дал мне возможность пользоваться кривой платформой, разработанной Дзюбой
+    </div>
+  );
+
+  const inputStyle = {
+    width: "100%", padding: "11px 14px", border: "1.5px solid #d1d5db",
+    borderRadius: 8, fontFamily: "inherit", fontSize: "1rem",
+    marginBottom: 14, outline: "none"
+  };
+  const btnBase = {
+    padding: "13px 20px", border: "none", borderRadius: 8,
+    fontFamily: "inherit", fontSize: "1rem", fontWeight: 700,
+    cursor: "pointer", width: "100%"
+  };
+
+  const okCount = results.filter(r => r.correct).length;
+  const badCount = results.length - okCount;
+
+  return (
+    <div style={{ fontFamily: "'JetBrains Mono', monospace", background: "#f9fafb", minHeight: "100vh", padding: 20 }}>
+      <div style={{ maxWidth: 660, margin: "0 auto", background: "#fff", padding: 30, borderRadius: 12, boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}>
+        <div style={{ fontSize: "1.35rem", fontWeight: 700, color: accent, marginBottom: 4 }}>Школьный турнир по физике</div>
+        <div style={{ fontSize: "0.78rem", color: "#6b7280", marginBottom: 26 }}>Декада синдиката точных наук // 2025 · 7 класс</div>
+
+        {/* HOME */}
+        {screen === "home" && (
+          <div>
+            {homeErr && <div style={{ color: red, fontSize: "0.83rem", marginBottom: 12, textAlign: "center" }}>{homeErr}</div>}
+            <button style={{ ...btnBase, background: accent, color: "#fff" }} onClick={beginTest}>▶ Начать тест (7 класс)</button>
+            <Blessing />
+          </div>
+        )}
+
+        {/* LOADING */}
+        {screen === "loading" && <Spinner text="Загружаем вопросы..." />}
+
+        {/* TEST */}
+        {screen === "test" && questions.length > 0 && (() => {
+          const q = questions[idx];
+          const done = Object.values(answers).filter(v => v?.trim()).length;
+          const isLast = idx === questions.length - 1;
+          return (
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                <div style={{ color: "#6b7280", fontSize: "0.85rem" }}>Вопрос {idx + 1} из {questions.length}</div>
+                <div style={{ fontSize: "1.25rem", fontWeight: 700, color: timeLeft <= 60 ? red : accent }}>
+                  {fmtTime(timeLeft)}
+                </div>
+              </div>
+              <div style={{ background: "#e5e7eb", height: 5, borderRadius: 3, marginBottom: 20 }}>
+                <div style={{ background: accent, height: "100%", borderRadius: 3, width: `${((idx + 1) / questions.length) * 100}%`, transition: "width .3s" }} />
+              </div>
+              <div style={{ fontSize: "1.05rem", lineHeight: 1.75, marginBottom: 20 }}>{q.text}</div>
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Ваш ответ..."
+                value={inputVal}
+                onChange={e => setInputVal(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && goNext()}
+                style={inputStyle}
+                autoComplete="off"
+              />
+              <div style={{ display: "flex", gap: 10 }}>
+                <button style={{ ...btnBase, background: "#e5e7eb", color: "#111", opacity: idx === 0 ? 0.4 : 1 }} disabled={idx === 0} onClick={goPrev}>← Назад</button>
+                <button style={{ ...btnBase, background: isLast ? green : accent, color: "#fff" }} onClick={goNext}>
+                  {isLast ? "✓ Завершить" : "Далее →"}
+                </button>
+              </div>
+              {done > 0 && <div style={{ fontSize: "0.75rem", color: "#9ca3af", textAlign: "right", marginTop: 8 }}>Отвечено: {done} из {questions.length}</div>}
+            </div>
+          );
+        })()}
+
+        {/* CHECKING */}
+        {screen === "checking" && (
+          <div>
+            <Spinner text="Проверяем ответы через ИИ..." />
+            <div style={{ textAlign: "center", color: "#6b7280", fontSize: "0.82rem", marginTop: 10 }}>{checkProgress}</div>
+          </div>
+        )}
+
+        {/* RESULTS */}
+        {screen === "results" && (
+          <div>
+            <div style={{ textAlign: "center", fontSize: "1.25rem", fontWeight: 700, marginBottom: 16 }}>Результаты</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginBottom: 22 }}>
+              {[
+                { label: "Верных", val: okCount, col: green },
+                { label: "Неверных", val: badCount, col: red },
+                { label: "Баллов", val: okCount * 10, bg: accent, col: "#fff" },
+              ].map(c => (
+                <div key={c.label} style={{ background: c.bg || "#f3f4f6", borderRadius: 8, padding: 14, textAlign: "center" }}>
+                  <div style={{ fontSize: "0.72rem", opacity: .75, marginBottom: 5, color: c.col || "#374151" }}>{c.label}</div>
+                  <div style={{ fontSize: "1.55rem", fontWeight: 700, color: c.col || (c.label === "Верных" ? green : c.label === "Неверных" ? red : "#111") }}>{c.val}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ fontWeight: 700, marginBottom: 12 }}>Детализация:</div>
+            <div style={{ maxHeight: 400, overflowY: "auto", marginBottom: 16 }}>
+              {results.map((r, i) => {
+                const noAns = !r.userAns;
+                const bg = noAns ? "#f3f4f6" : r.correct ? "#d1fae5" : "#fee2e2";
+                const border = noAns ? "#d1d5db" : r.correct ? green : red;
+                const icon = noAns ? "⬜" : r.correct ? "✅" : "❌";
+                const label = noAns ? "Нет ответа" : r.correct ? "Верно" : "Неверно";
+                return (
+                  <div key={i} style={{ background: bg, borderLeft: `4px solid ${border}`, borderRadius: 8, padding: "11px 14px", marginBottom: 8, fontSize: "0.88rem", lineHeight: 1.5 }}>
+                    <b>{icon} Вопрос {i + 1}</b> — {label}<br />
+                    <span style={{ fontSize: "0.82rem", color: "#444" }}>{r.q.text}</span><br />
+                    Ваш ответ: <code style={{ background: "rgba(0,0,0,.07)", padding: "1px 5px", borderRadius: 3 }}>{r.userAns || "—"}</code>
+                    {r.comment && <><br /><span style={{ fontSize: "0.77rem", color: "#6b7280" }}>{r.comment}</span></>}
+                  </div>
+                );
+              })}
+              <div style={{ padding: 10, color: "#9ca3af", fontSize: "0.76rem" }}>
+                ⏱ Время: {Math.floor(timeSpent / 60)}м {timeSpent % 60}с
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <button style={{ ...btnBase, background: "#e5e7eb", color: "#111" }} onClick={retake}>На главную</button>
+              <button style={{ ...btnBase, background: accent, color: "#fff" }} onClick={retake}>Ещё раз</button>
+            </div>
+            <Blessing />
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
-// ── РЕЗУЛЬТАТЫ ─────────────────────────────────────────────────────────────
-function showResults(results, spent) {
-    go('results');
-
-    const okCount  = results.filter(r => r.correct).length;
-    const badCount = results.length - okCount;
-    const total    = okCount * 10; // 10 баллов за верный ответ
-
-    document.getElementById('r-ok').textContent    = okCount;
-    document.getElementById('r-bad').textContent   = badCount;
-    document.getElementById('r-total').textContent = total;
-
-    const m = Math.floor(spent / 60), s = spent % 60;
-
-    document.getElementById('r-details').innerHTML =
-        results.map((r, i) => {
-            const cls   = !r.userAns ? 'skip' : r.correct ? 'ok' : 'bad';
-            const icon  = !r.userAns ? '⬜' : r.correct ? '✅' : '❌';
-            const label = !r.userAns ? 'Нет ответа' : r.correct ? 'Верно' : 'Неверно';
-            return `<div class="ditem ${cls}">
-                <b>${icon} Вопрос ${i + 1}</b> — ${label}<br>
-                <span style="font-size:0.82rem;color:#444">${r.q.text}</span><br>
-                Ваш ответ: <code>${r.userAns || '—'}</code>
-                ${r.comment ? `<br><span style="font-size:0.78rem;color:var(--g500)">${r.comment}</span>` : ''}
-            </div>`;
-        }).join('') +
-        `<div style="padding:10px;color:var(--g500);font-size:0.78rem;margin-top:6px">
-            ⏱ Затраченное время: ${m}м ${s}с
-        </div>`;
-}
-</script>
-</body>
-</html>
